@@ -23,7 +23,7 @@ else:
     try:
         genai.configure(api_key=GEMINI_API_KEY)
         # Directly target the active gemini-3.6-flash model
-        model = genai.GenerativeModel("gemini-3.6-flash")
+        model = genai.GenerativeModel("gemini-2.0-flash")
     except Exception as e:
         st.error(f"Error configuring AI: {e}")
 
