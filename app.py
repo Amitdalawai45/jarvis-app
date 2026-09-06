@@ -3,13 +3,11 @@ import time
 import streamlit as st
 import google.generativeai as genai
 
-# Page setup for mobile and desktop screens
 st.set_page_config(page_title="JARVIS AI", page_icon="🤖", layout="centered")
 
 st.title("🤖 JARVIS AI Assistant")
 st.caption("Powered by Google Gemini — Accessible Everywhere")
 
-# Retrieve API key securely from Streamlit Secrets or Environment
 GEMINI_API_KEY = None
 if "GEMINI_API_KEY" in st.secrets:
     GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
@@ -23,53 +21,51 @@ if not GEMINI_API_KEY:
 else:
     try:
         genai.configure(api_key=GEMINI_API_KEY)
-        # Using the active, high-quota lite model
         model = genai.GenerativeModel("gemini-3.5-flash-lite")
     except Exception as e:
         st.error(f"Error configuring AI: {e}")
 
-# Initialize message history
+# Step A: Initialize message history in session state
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {"role": "assistant", "content": "Hello sir! I am JARVIS. How can I help you today?"}
     ]
 
-# Display chat history
+# Step B: Render existing conversation history
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# Chat input bar
+# Step C: Handle new user prompts
 if prompt := st.chat_input("Ask JARVIS anything..."):
-    # Add user message
+    # 1. Append user query to memory and display
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.write(prompt)
 
-    # Generate assistant response
     if model:
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 reply = ""
-                # Automatic retry handling in case of brief bursts
                 for attempt in range(2):
                     try:
                         sys_prompt = (
-                            "You are JARVIS, a helpful personal AI assistant. "
-                            "Detect the language (English, Hindi, Marathi) and reply in that language. "
-                            "Keep your response concise, polite, and helpful."
+                            "You are JARVIS, an advanced personal AI assistant. "
+                            "If anyone asks who created, built, or developed you, proudly state that you were created and built by Amit Dalawai. "
+                            "Detect the language (English, Hindi, Marathi) and reply in that same language. "
+                            "Keep answers polite, helpful, and concise."
                         )
                         res = model.generate_content(f"{sys_prompt}\nUser Query: {prompt}")
                         reply = res.text
                         break
                     except Exception as err:
-                        err_str = str(err)
-                        if "429" in err_str and attempt == 0:
+                        if "429" in str(err) and attempt == 0:
                             time.sleep(10)
                             continue
                         reply = f"Trouble reaching servers: {err}"
 
                 st.write(reply)
+                # 2. Append assistant answer to memory
                 st.session_state.messages.append({"role": "assistant", "content": reply})
     else:
         st.error("Cannot process request: Gemini model is not initialized.")
