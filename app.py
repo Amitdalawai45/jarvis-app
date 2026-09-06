@@ -1,4 +1,5 @@
 import os
+import time
 import streamlit as st
 import google.generativeai as genai
 
@@ -22,8 +23,8 @@ if not GEMINI_API_KEY:
 else:
     try:
         genai.configure(api_key=GEMINI_API_KEY)
-        # Directly target the active gemini-3.6-flash model
-        model = genai.GenerativeModel("gemini-2.0-flash")
+        # Using the active, high-quota lite model
+        model = genai.GenerativeModel("gemini-3.5-flash-lite")
     except Exception as e:
         st.error(f"Error configuring AI: {e}")
 
@@ -49,16 +50,24 @@ if prompt := st.chat_input("Ask JARVIS anything..."):
     if model:
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
-                try:
-                    sys_prompt = (
-                        "You are JARVIS, a helpful personal AI assistant. "
-                        "Detect the language (English, Hindi, Marathi) and reply in the same language. "
-                        "Keep your response concise, polite, and helpful."
-                    )
-                    res = model.generate_content(f"{sys_prompt}\nUser Query: {prompt}")
-                    reply = res.text
-                except Exception as err:
-                    reply = f"Trouble reaching servers: {err}"
+                reply = ""
+                # Automatic retry handling in case of brief bursts
+                for attempt in range(2):
+                    try:
+                        sys_prompt = (
+                            "You are JARVIS, a helpful personal AI assistant. "
+                            "Detect the language (English, Hindi, Marathi) and reply in that language. "
+                            "Keep your response concise, polite, and helpful."
+                        )
+                        res = model.generate_content(f"{sys_prompt}\nUser Query: {prompt}")
+                        reply = res.text
+                        break
+                    except Exception as err:
+                        err_str = str(err)
+                        if "429" in err_str and attempt == 0:
+                            time.sleep(10)
+                            continue
+                        reply = f"Trouble reaching servers: {err}"
 
                 st.write(reply)
                 st.session_state.messages.append({"role": "assistant", "content": reply})
