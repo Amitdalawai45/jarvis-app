@@ -8,7 +8,7 @@ st.set_page_config(page_title="JARVIS AI", page_icon="🤖", layout="centered")
 st.title("🤖 JARVIS AI Assistant")
 st.caption("Powered by Google Gemini — Accessible Everywhere")
 
-# Retrieve API key securely without exposing it in source code
+# Retrieve API key securely from Streamlit Secrets or Environment
 GEMINI_API_KEY = None
 if "GEMINI_API_KEY" in st.secrets:
     GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
@@ -22,7 +22,8 @@ if not GEMINI_API_KEY:
 else:
     try:
         genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel("gemini-2.5-flash")
+        # Directly target the active gemini-3.6-flash model
+        model = genai.GenerativeModel("gemini-3.6-flash")
     except Exception as e:
         st.error(f"Error configuring AI: {e}")
 
