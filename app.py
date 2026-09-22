@@ -28,7 +28,7 @@ else:
     try:
         genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel(
-            model_name="gemini-3.6-flash",
+            model_name="gemini-2.5-flash",
             system_instruction=sys_instruction
         )
     except Exception as e:
@@ -36,7 +36,7 @@ else:
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "assistant", "content": "Hello..! I am JARVIS. How can I help you today?"}
+        {"role": "assistant", "content": "Hello sir! I am JARVIS. How can I help you today?"}
     ]
 
 for msg in st.session_state.messages:
@@ -55,12 +55,21 @@ if prompt := st.chat_input("Ask JARVIS anything..."):
                     gemini_history = []
                     for msg in st.session_state.messages[:-1]:
                         role = "user" if msg["role"] == "user" else "model"
-                        gemini_history.append({"role": role, "parts": [msg["content"]]})
+                        # Ensure we don't push empty content into history
+                        content_text = msg["content"]
+                        if content_text.strip():
+                            gemini_history.append({"role": role, "parts": [content_text]})
                     
                     chat_session = model.start_chat(history=gemini_history)
                     response_stream = chat_session.send_message(prompt, stream=True)
                 
                 reply = st.write_stream(response_stream)
+                
+                # Fallback if stream returns an empty response
+                if not reply or not reply.strip():
+                    reply = "Hello sir! How can I assist you further?"
+                    st.write(reply)
+
                 st.session_state.messages.append({"role": "assistant", "content": reply})
                 
             except Exception as err:
