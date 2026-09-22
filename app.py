@@ -16,12 +16,24 @@ else:
 
 model = None
 
+# Define System Instruction
+sys_instruction = (
+    "You are JARVIS, an advanced personal AI assistant. "
+    "If anyone asks who created, built, or developed you, proudly state that you were created and built by Amit Dalawai. "
+    "Detect the language (English, Hindi, Marathi) and reply in that same language. "
+    "Keep answers polite, helpful, and concise."
+)
+
 if not GEMINI_API_KEY:
     st.warning("⚠️ API Key not detected. Please configure GEMINI_API_KEY in Streamlit Secrets.")
 else:
     try:
         genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel("gemini-3.5-flash-lite")
+        # Initialize model with system instructions
+        model = genai.GenerativeModel(
+            model_name="gemini-3.5-flash-lite",
+            system_instruction=sys_instruction
+        )
     except Exception as e:
         st.error(f"Error configuring AI: {e}")
 
@@ -49,13 +61,16 @@ if prompt := st.chat_input("Ask JARVIS anything..."):
                 reply = ""
                 for attempt in range(2):
                     try:
-                        sys_prompt = (
-                            "You are JARVIS, an advanced personal AI assistant. "
-                            "If anyone asks who created, built, or developed you, proudly state that you were created and built by Amit Dalawai. "
-                            "Detect the language (English, Hindi, Marathi) and reply in that same language. "
-                            "Keep answers polite, helpful, and concise."
-                        )
-                        res = model.generate_content(f"{sys_prompt}\nUser Query: {prompt}")
+                        # Convert Streamlit message history to Gemini chat history format
+                        gemini_history = []
+                        for msg in st.session_state.messages[:-1]: # Exclude the latest prompt as it will be sent via send_message
+                            role = "user" if msg["role"] == "user" else "model"
+                            gemini_history.append({"role": role, "parts": [msg["content"]]})
+                        
+                        # Start chat session with history
+                        chat_session = model.start_chat(history=gemini_history)
+                        res = chat_session.send_message(prompt)
+                        
                         reply = res.text
                         break
                     except Exception as err:
