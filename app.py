@@ -5,8 +5,8 @@ import google.generativeai as genai
 
 st.set_page_config(page_title="JARVIS AI", page_icon="🤖", layout="centered")
 
-st.title("🤖 JARVIS AI Assistant")
-st.caption("Powered by Google Gemini — Accessible Everywhere")
+st.title("🐍 JARVIS AI ")
+st.caption("Created by AMIT DALAWAI — Accessible Everywhere")
 
 GEMINI_API_KEY = None
 if "GEMINI_API_KEY" in st.secrets:
