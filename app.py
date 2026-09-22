@@ -31,7 +31,7 @@ else:
         genai.configure(api_key=GEMINI_API_KEY)
         # Initialize model with system instructions
         model = genai.GenerativeModel(
-            model_name="gemini-3.8-flash",
+            model_name="gemini-3.5-flash-lite",
             system_instruction=sys_instruction
         )
     except Exception as e:
@@ -57,7 +57,7 @@ if prompt := st.chat_input("Ask JARVIS anything..."):
 
     if model:
         with st.chat_message("assistant"):
-            with st.spinner("......"):
+            with st.spinner("processing..."):
                 reply = ""
                 for attempt in range(2):
                     try:
