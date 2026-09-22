@@ -3,7 +3,7 @@ import time
 import streamlit as st
 import google.generativeai as genai
 
-st.set_page_config(page_title="JARVIS AI", page_icon="🤖", layout="centered")
+st.set_page_config(page_title="JARVIS AI", page_icon="🐍", layout="centered")
 
 st.title("🐍 JARVIS AI ")
 st.caption("Created by AMIT DALAWAI — Accessible Everywhere")
@@ -31,7 +31,7 @@ else:
         genai.configure(api_key=GEMINI_API_KEY)
         # Initialize model with system instructions
         model = genai.GenerativeModel(
-            model_name="gemini-3.5-flash-lite",
+            model_name="gemini-3.8-flash",
             system_instruction=sys_instruction
         )
     except Exception as e:
@@ -57,7 +57,7 @@ if prompt := st.chat_input("Ask JARVIS anything..."):
 
     if model:
         with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
+            with st.spinner("......"):
                 reply = ""
                 for attempt in range(2):
                     try:
