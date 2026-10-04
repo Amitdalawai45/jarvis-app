@@ -3,9 +3,9 @@ import time
 import streamlit as st
 import google.generativeai as genai
 
-st.set_page_config(page_title="JARVIS AI", page_icon="🤖", layout="centered")
+st.set_page_config(page_title="JARVIS AI", page_icon="🐍", layout="centered")
 
-st.title("🤖 JARVIS AI Assistant")
+st.title("🐍 THE JARVIS ")
 st.caption("Powered by Google Gemini — Accessible Everywhere")
 
 GEMINI_API_KEY = None
